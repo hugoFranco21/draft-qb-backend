@@ -1,8 +1,5 @@
 import pandas as pd
-from sklearn import datasets, linear_model
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 
@@ -18,7 +15,6 @@ renamed = {
 columns = [
     'Draft',
     'Sacked %',
-    'Heisman',
     'Completion Percentage',
     'Yards per Attempt',
     'Efficiency Rating'
@@ -32,25 +28,20 @@ print(df)
 df_y = df['QB Rating']
 df_x = df[['Draft',
     'Sacked %',
-    'Heisman',
     'Completion Percentage',
     'Yards per Attempt',
     'Efficiency Rating']]
 
-min_max_scaler = MinMaxScaler()
-data_minmax = min_max_scaler.fit_transform(df_x)
-
-scaled_df = pd.DataFrame(data_minmax, columns=columns)
-print(scaled_df)
-
-X = scaled_df
+X = df_x
 y = df_y
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-regr = linear_model.LinearRegression()
+regr = linear_model.LinearRegression(normalize=True)
 
-regr.fit(X_train, y_train)
+sample_weight = y_train.apply(lambda h: 3 if h < 90 else 2)
+
+regr.fit(X_train, y_train, sample_weight=sample_weight)
 
 # Make predictions using the testing set
 y_pred = regr.predict(X_test)
