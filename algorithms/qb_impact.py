@@ -143,7 +143,7 @@ def main():
 	y_test = df_y.tail(150).to_numpy()
 	min_max_scaler = MinMaxScaler()
 	data_minmax = min_max_scaler.fit_transform(X_train)
-	params = [5,2,8,-5,-5,-3]
+	params = [10,5,4,3,-7,1]
 	alfa = 0.005
 	epochs = 0
 	print(data_minmax, 'X')
@@ -155,7 +155,7 @@ def main():
 		show_errors(params, data_minmax, y_train)  #only used to show errors, it is not used in calculation
 		print (params)
 		epochs = epochs + 1
-		if(oldparams == params or epochs == 1):   #  local minima is found when there is no further improvement
+		if(oldparams == params or epochs == 1000):   #  local minima is found when there is no further improvement
 			print ("samples:")
 			print(data_minmax)
 			print ("final params:")
@@ -178,7 +178,6 @@ def main():
 	print('Coefficient of determination: %.2f'
 		% r2_score(y_test, y_pred))
 	print(min_max_scaler.scale_)
-	print(min_max_scaler.transform([[67.4, 932, 4.8584, 1062, 5.4021, 20]]))
 
 #use this to generate a graph of the errors/loss so we can see whats going on (diagnostics)
 
