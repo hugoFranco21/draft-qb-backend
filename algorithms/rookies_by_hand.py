@@ -30,7 +30,6 @@ def show_errors(params, samples,y):
 		y (lst) a list containing the corresponding real result for each sample
 	
 	"""
-	global __errors__
 	error_acum =0
 #	print("transposed samples") 
 #	print(samples)
@@ -40,6 +39,7 @@ def show_errors(params, samples,y):
 		error=hyp-y[i]
 		error_acum=+error**2 # this error is the original cost function, (the one used to make updates in GD is the derivated verssion of this formula)
 	mean_error_param=error_acum/len(samples)
+	print(mean_error_param, 'mean _error')
 	__errors__.append(mean_error_param)
 
 def GD(params, samples, y, alfa):
@@ -120,7 +120,7 @@ params = [0,0,0,0,0]
 #samples = [[1,1],[2,2],[3,3],[4,4],[5,5],[2,2],[3,3],[4,4]]
 #y = [2,4,6,8,10,2,5.5,16]
 
-alfa = 0.001  #  learning rate
+alfa = 0.0001  #  learning rate
 samples = numpy.asarray(X_train)
 y_test_array = numpy.asarray(y_test)
 y_hand = numpy.asarray(y_train)
@@ -148,7 +148,7 @@ while True:  #  run gradient descent until local minima is reached
 	show_errors(params, samples, y_hand)  #only used to show errors, it is not used in calculation
 	print (params)
 	epochs = epochs + 1
-	if(oldparams == params or epochs == 1):   #  local minima is found when there is no further improvement
+	if(oldparams == params or epochs == 100):   #  local minima is found when there is no further improvement
 		print ("samples:")
 		print(samples)
 		print ("final params:")
@@ -156,8 +156,7 @@ while True:  #  run gradient descent until local minima is reached
 		break
 
 import matplotlib.pyplot as plt  #use this to generate a graph of the errors/loss so we can see whats going on (diagnostics)
-plt.plot(__errors__)
-plt.show(block=True)
+print(__errors__)
 
 # Make predictions using the testing set
 y_pred = []
@@ -177,3 +176,5 @@ print('Mean squared error: %.2f'
 print('Coefficient of determination: %.2f'
     % r2_score(y_test_array, y_pred))
 
+plt.plot(__errors__)
+plt.savefig('../assets/error.png')
