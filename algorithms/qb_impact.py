@@ -2,8 +2,28 @@ import numpy  #numpy is used to make some operrations with arrays more easily
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 
 __errors__= [];  #global variable to store the errors/loss for visualisation
+
+renamed = {
+    'W': 'Wins',
+    'Rate': 'QB Rating',
+    'Ply':  'Offensive plays',
+    'Y/P': 'Yards per play', 
+    'DPly': 'Defensive plays',
+    'DY/P': 'D Yards per play',
+	'NQTO': 'Non QB Turnovers'
+}
+
+def prepare_data():
+	df = pd.read_excel('../datasets/qb_impact.xlsx', header=1, usecols=[4, 13, 16, 18, 19, 20, 21, 22])
+	df['NQTO'] = df['TO']-df['Int']
+	df = df[['W', 'Rate', 'Ply', 'Y/P', 'DPly', 'DY/P', 'NQTO']]
+	df.rename(columns = renamed, inplace = True)
+	return df
+
 
 def h(params, sample):
 	"""This evaluates a generic linear function h(x) with current parameters.  h stands for hypothesis
@@ -39,11 +59,11 @@ def show_errors(params, samples,y):
 		error=hyp-y[i]
 		error_acum=+error**2 # this error is the original cost function, (the one used to make updates in GD is the derivated verssion of this formula)
 	mean_error_param=error_acum/len(samples)
-	print(mean_error_param, 'mean _error')
 	__errors__.append(mean_error_param)
 
 def GD(params, samples, y, alfa):
-    """Gradient Descent algorithm 
+	"""
+	Gradient Descent algorithm 
 	Args:
 		params (lst) a list containing the corresponding parameter for each element x of the sample
 		samples (lst) a 2 dimensional list containing the input samples 
@@ -52,40 +72,15 @@ def GD(params, samples, y, alfa):
 	Returns:
 		temp(lst) a list with the new values for the parameters after 1 run of the sample set
 	"""
-    print(params, 'params')
-    temp = list(params)
-    print(temp, 'temp')
-    general_error=0
-    for j in range(len(params)):
-        acum =0; error_acum=0
-        for i in range(len(samples)):
-            error = h(params,samples[i]) - y[i]
-            print(error, 'error')
-            acum = acum + error*samples[i][j]  #Sumatory part of the Gradient Descent formula for linear Regression.
-        temp[j] = params[j] - alfa*(1/len(samples))*acum  #Subtraction of original parameter value with learning rate included.
-    return temp
-
-def scaling(samples):
-	"""Normalizes sample values so that gradient descent can converge
-	Args:
-		params (lst) a list containing the corresponding parameter for each element x of the sample
-	Returns:
-		samples(lst) a list with the normalized version of the original samples
-	"""
-	acum =0
-	samples = numpy.asarray(samples).T.tolist() 
-	for i in range(1,len(samples)):	
-		for j in range(len(samples[i])):
-			acum=+ samples[i][j]
-		avg = acum/(len(samples[i]))
-		max_val = max(samples[i])
-		#print("avg %f" % avg)
-		#print(max_val)
-		for j in range(len(samples[i])):
-			#print(samples[i][j])
-			samples[i][j] = (samples[i][j] - avg)/max_val  #Mean scaling
-	return numpy.asarray(samples).T.tolist()
-
+	temp = list(params)
+	general_error=0
+	for j in range(len(params)):
+		acum =0; error_acum=0
+		for i in range(len(samples)):
+			error = h(params,samples[i]) - y[i]
+			acum = acum + error*samples[i][j]  #Sumatory part of the Gradient Descent formula for linear Regression.
+		temp[j] = params[j] - alfa*(1/len(samples))*acum  #Subtraction of original parameter value with learning rate included.
+	return temp
 
 #  univariate example
 #params = [0,0]
@@ -93,14 +88,7 @@ def scaling(samples):
 #y = [2,4,6,8,10]
 
 #  multivariate example trivial
-renamed = {
-    'Heisman': 'Heisman',
-    'Pct': 'Completion Percentage',
-    'Y/A.1':  'Yards per Attempt',
-    'Rate.1': 'Efficiency Rating', 
-    'Rate': 'QB Rating',
-    'Sk%': 'Sacked %'
-}
+"""
 df = pd.read_excel('../datasets/collegeToPros.xlsx', header=1, usecols=[4, 6, 20, 28, 29, 30, 31])
 df.rename(columns = renamed, inplace = True)
 df['Sacked %'] = df['Sacked %']*100
@@ -138,43 +126,63 @@ print ("original samples:")
 print ("scaled samples:")
 #print (samples)
 
+"""
 
-epochs = 0
-
-while True:  #  run gradient descent until local minima is reached
-	oldparams = list(params)
-	print (params)
-	params=GD(params, samples,y_hand,alfa)	
-	show_errors(params, samples, y_hand)  #only used to show errors, it is not used in calculation
-	print (params)
-	epochs = epochs + 1
-	if(oldparams == params or epochs == 100):   #  local minima is found when there is no further improvement
-		print ("samples:")
-		print(samples)
-		print ("final params:")
+def main():
+	df = prepare_data()
+	df_y = df['Wins']
+	df_x = df[['QB Rating',
+    'Offensive plays',
+    'Yards per play',
+    'Defensive plays',
+    'D Yards per play',
+	'Non QB Turnovers']]
+	X_train = df_x.head(520).to_numpy()
+	X_test = df_x.tail(150).to_numpy()
+	y_train = df_y.head(520).to_numpy()
+	y_test = df_y.tail(150).to_numpy()
+	min_max_scaler = MinMaxScaler()
+	data_minmax = min_max_scaler.fit_transform(X_train)
+	params = [5,2,8,-5,-5,-3]
+	alfa = 0.005
+	epochs = 0
+	print(data_minmax, 'X')
+	print(y_train, 'y')
+	while True:  #  run gradient descent until local minima is reached
+		oldparams = list(params)
 		print (params)
-		break
-
-import matplotlib.pyplot as plt  #use this to generate a graph of the errors/loss so we can see whats going on (diagnostics)
-print(__errors__)
-
-# Make predictions using the testing set
-y_pred = []
-print(x_test)
-for x in x_test:
-    aux = 0
-    for i in range(5):
-        aux = aux + x[i]*params[i]
-    y_pred.append(aux)
-
-# The coefficients
-print('Coefficients: \n', params)
+		params=GD(params, data_minmax,y_train,alfa)	
+		show_errors(params, data_minmax, y_train)  #only used to show errors, it is not used in calculation
+		print (params)
+		epochs = epochs + 1
+		if(oldparams == params or epochs == 1):   #  local minima is found when there is no further improvement
+			print ("samples:")
+			print(data_minmax)
+			print ("final params:")
+			print (params)
+			break
+	y_pred = []
+	min_max_scaler.scaler_ = [0.01416431, 0.00301205, 0.3262217,  0.00373134, 0.36425892, 0.04166667]
+	norm_xtest = min_max_scaler.transform(X_test)
+	for x in norm_xtest:
+		aux = 0
+		for i in range(6):
+			aux = aux + x[i]*params[i]
+		y_pred.append(aux)
+	# The coefficients
+	print('Coefficients: \n', params)
 # The mean squared error
-print('Mean squared error: %.2f'
-    % mean_squared_error(y_test_array, y_pred))
+	print('Mean squared error: %.2f'
+		% mean_squared_error(y_test, y_pred))
 # The coefficient of determination: 1 is perfect prediction
-print('Coefficient of determination: %.2f'
-    % r2_score(y_test_array, y_pred))
+	print('Coefficient of determination: %.2f'
+		% r2_score(y_test, y_pred))
+	print(min_max_scaler.scale_)
+	print(min_max_scaler.transform([[67.4, 932, 4.8584, 1062, 5.4021, 20]]))
+
+#use this to generate a graph of the errors/loss so we can see whats going on (diagnostics)
+
+main()
 
 plt.plot(__errors__)
 plt.savefig('../assets/error.png')
