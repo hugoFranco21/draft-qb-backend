@@ -1,14 +1,13 @@
 from flask import Flask
 from flask import request, jsonify
-from predictions import get_rookie_prediction
+from predictions import get_rookie_prediction, get_wins_prediction
 import json
 
 app = Flask(__name__)
 
 @app.route('/rookie-production', methods=['POST'])
 def predict_rookies():
-    data = request.get_json()
-    print(data)
+    data = request.data
     norm = get_rookie_prediction(data)
     output = {
         'success': False
@@ -18,9 +17,20 @@ def predict_rookies():
             'success': True,
             'prediction': norm
         }
+    return json.dumps(output)
+
+@app.route('/wins-expected', methods=['POST'])
+def predict_wins():
+    data = request.data
+    norm = get_wins_prediction(data)
     output = {
-        'success': True
+        'success': False
     }
+    if norm > 0:
+        output = {
+            'success': True,
+            'prediction': norm
+        }
     return json.dumps(output)
 
 if __name__ == '__main__':

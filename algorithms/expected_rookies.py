@@ -3,6 +3,7 @@ from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
 
 renamed = {
     'Heisman': 'Heisman',
@@ -21,10 +22,11 @@ columns = [
     'Efficiency Rating'
 ]
 
-df = pd.read_excel('../datasets/collegeToPros.xlsx', header=1, usecols=[4, 6, 20, 28, 29, 30, 31])
+df = pd.read_excel('../datasets/collegeToPros.xlsx', header=1, usecols=[0, 4, 6, 20, 28, 29, 30, 31])
 df.rename(columns = renamed, inplace = True)
 df['Sacked %'] = df['Sacked %']*100
 print(df)
+x_plot = df[['Rk']]
 
 df_y = df['QB Rating']
 df_x = df[['Draft',
@@ -53,9 +55,16 @@ regr.fit(data_minmax, y_train, sample_weight=sample_weight)
 # Make predictions using the testing set
 y_pred = regr.predict(min_max_scaler.transform(X_test))
 
+y_plot = regr.predict(min_max_scaler.transform(df_x.to_numpy()))
+plt.plot(x_plot.to_numpy(), df_y.to_numpy())
+plt.plot(x_plot.to_numpy(), y_plot)
+plt.savefig('../assets/comparison1.png')
+
 f.write('\nscale ' + str(min_max_scaler.scale_))
+f.write('\nmin ' + str(min_max_scaler.min_))
 # The coefficients
 f.write('\nCoefficients: \n' + str(regr.coef_))
+f.write('\nIntercept: \n' + str(regr.intercept_))
 # The mean squared error
 f.write('\nMean squared error: %.2f\n'
     % mean_squared_error(y_test, y_pred))

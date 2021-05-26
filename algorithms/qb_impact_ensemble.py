@@ -94,6 +94,13 @@ def main():
 	'Non QB Turnovers']]
 	X = df_x.to_numpy()
 	y = df_y.to_numpy()
+	df_plot = df[['QB Rating', 'Wins']]
+	df_plot.sort_values('Wins')
+	print(df_plot)
+	x_plot = df['QB Rating'].to_numpy()
+	y_plot = df['Wins'].to_numpy()
+	plt.plot(x_plot, y_plot)
+	plt.savefig('../assets/WinsVsRating.png')
 	min_max_scaler = MinMaxScaler()
 	data_minmax = min_max_scaler.fit_transform(X)
 	params1 = [0,0,0,0,0,0]
@@ -178,6 +185,7 @@ def main():
 	f = open("../output/script2_ensemble.txt", "w")
 	f.write("Output of the script 2 (ensemble version)\n")
 	f.write('\nscale ' + str(min_max_scaler.scale_))
+	f.write('\nmin ' + str(min_max_scaler.min_))
 	# The coefficients
 	f.write('\nCoefficients 1: \n' + str(params1))
 	# The coefficients
