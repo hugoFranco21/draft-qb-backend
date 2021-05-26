@@ -19,11 +19,12 @@ renamed = {
 }
 
 def prepare_data():
-	df = pd.read_excel('../datasets/qb_impact.xlsx', header=1, usecols=[4, 13, 14, 16, 18, 19, 20, 21, 22])
+	df = pd.read_excel('../datasets/qb_impact.xlsx', header=1, usecols=[4,11, 13, 14, 15, 16, 18, 19, 20, 21, 22])
 	df['NQTO'] = df['TO']-df['Int']
-	df = df[['W', 'Sk', 'Rate', 'Ply', 'Y/P', 'DPly', 'DY/P', 'NQTO']]
+	df = df[['W','Sk', 'Rate', 'Ply', 'Y/P', 'DPly', 'DY/P', 'NQTO']]
 	df.rename(columns = renamed, inplace = True)
 	return df
+
 
 def h(params, sample):
 	"""This evaluates a generic linear function h(x) with current parameters.  h stands for hypothesis
@@ -91,53 +92,110 @@ def main():
 	'Defensive plays',
     'D Yards per play',
 	'Non QB Turnovers']]
-	X_train = df_x.head(520).to_numpy()
-	X_test = df_x.tail(150).to_numpy()
-	y_train = df_y.head(520).to_numpy()
-	y_test = df_y.tail(150).to_numpy()
+	X = df_x.to_numpy()
+	y = df_y.to_numpy()
 	min_max_scaler = MinMaxScaler()
-	data_minmax = min_max_scaler.fit_transform(X_train)
-	#params = [10,0,5,4,3,-7,1]
-	params = [1,1,1,1,-1,1]
-	alfa = 0.05
+	data_minmax = min_max_scaler.fit_transform(X)
+	params1 = [0,0,0,0,0,0]
+	alfa = 0.1
 	epochs = 0
-	print(data_minmax, 'X')
-	print(y_train, 'y')
 	while True:  #  run gradient descent until local minima is reached
-		oldparams = list(params)
-		print (params)
-		params=GD(params, data_minmax,y_train,alfa)	
-		show_errors(params, data_minmax, y_train)  #only used to show errors,it is not used in calculation
-		print (params)
+		oldparams = list(params1)
+		print (params1)
+		params1=GD(params1, data_minmax,y,alfa)	
+		show_errors(params1, data_minmax, y)  #only used to show errors,it is not used in calculation
+		print (params1)
 		epochs = epochs + 1
-		if(oldparams == params or epochs == 10000):   #  local minima is found when there is no further improvement
+		if(oldparams == params1 or epochs == 10000):   #  local minima is found when there is no further improvement
 			print ("samples:")
 			print(data_minmax)
 			print ("final params:")
-			print (params)
+			print (params1)
+			break
+	y2 = []
+	for index, x in enumerate(data_minmax):
+		aux = y[index] - h(params1, x)
+		y2.append(aux)
+	epochs = 0
+	params2 = [0,0,0,0,0,0]
+	alfa = 0.01
+	while True:  #  run gradient descent until local minima is reached
+		oldparams = list(params2)
+		print (params2)
+		params2=GD(params2, data_minmax,y2,alfa)	
+		show_errors(params2, data_minmax, y2)  #only used to show errors,it is not used in calculation
+		print (params2)
+		epochs = epochs + 1
+		if(oldparams == params2 or epochs == 500):   #  local minima is found when there is no further improvement
+			print ("samples:")
+			print(data_minmax)
+			print ("final params:")
+			print (params2)
+			break
+	y3 = []
+	for index, x in enumerate(data_minmax):
+		aux = y2[index] - h(params2, x)
+		y3.append(aux)
+	epochs = 0
+	params3 = [0,0,0,0,0,0]
+	while True:  #  run gradient descent until local minima is reached
+		oldparams = list(params3)
+		print (params3)
+		params3=GD(params3, data_minmax,y3,alfa)	
+		show_errors(params3, data_minmax, y3)  #only used to show errors,it is not used in calculation
+		print (params3)
+		epochs = epochs + 1
+		if(oldparams == params3 or epochs == 500):   #  local minima is found when there is no further improvement
+			print ("samples:")
+			print(data_minmax)
+			print ("final params:")
+			print (params3)
+			break
+	y4 = []
+	for index, x in enumerate(data_minmax):
+		aux = y3[index] - h(params3, x)
+		y4.append(aux)
+	epochs = 0
+	params4 = [0,0,0,0,0,0]
+	while True:  #  run gradient descent until local minima is reached
+		oldparams = list(params4)
+		print (params4)
+		params4=GD(params4, data_minmax,y4,alfa)	
+		show_errors(params4, data_minmax, y4)  #only used to show errors,it is not used in calculation
+		print (params4)
+		epochs = epochs + 1
+		if(oldparams == params4 or epochs == 500):   #  local minima is found when there is no further improvement
+			print ("samples:")
+			print(data_minmax)
+			print ("final params:")
+			print (params3)
 			break
 	y_pred = []
-	norm_xtest = min_max_scaler.transform(X_test)
-	for x in norm_xtest:
-		aux = h(params, x)
+	for index, x in enumerate(data_minmax):
+		aux = h(params1, x) + h(params2, x) + h(params3, x) + h(params4,x)
 		y_pred.append(aux)
-	f = open("../output/script2.txt", "w")
-
-	f.write("Output of the script 2\n")
+	# The coefficients
+	f = open("../output/script2_ensemble.txt", "w")
+	f.write("Output of the script 2 (ensemble version)\n")
 	f.write('\nscale ' + str(min_max_scaler.scale_))
 	# The coefficients
-	f.write('\nCoefficients: \n' + str(params))
+	f.write('\nCoefficients 1: \n' + str(params1))
+	# The coefficients
+	f.write('\nCoefficients 2: \n' + str(params2))
+	# The coefficients
+	f.write('\nCoefficients 3: \n' + str(params3))
+
+	f.write('\nCoefficients 4: \n' + str(params4))
 # The mean squared error
-	f.write('\nMean squared error: %.2f\n'
-		% mean_squared_error(y_test, y_pred))
+	f.write('\nMean squared error: %.2f'
+		% mean_squared_error(y, y_pred))
 # The coefficient of determination: 1 is perfect prediction
-	f.write('\nCoefficient of determination: %.2f\n'
-		% r2_score(y_test, y_pred))
-	f.close()
+	f.write('\nCoefficient of determination: %.2f'
+		% r2_score(y, y_pred))
 
 #use this to generate a graph of the errors/loss so we can see whats going on (diagnostics)
 
 main()
 
 plt.plot(__errors__)
-plt.savefig('../assets/error.png')
+plt.savefig('../assets/error2.png')

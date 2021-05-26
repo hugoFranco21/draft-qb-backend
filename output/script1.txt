@@ -1,0 +1,8 @@
+Output of the script 1
+
+scale [0.2        0.07633588 0.06060606 0.24390244 0.01510574]
+Coefficients: 
+[ 1.71814446 -4.7037779  25.32033643  3.60841173 -6.91661286]
+Mean squared error: 26.68
+
+Coefficient of determination: 0.62

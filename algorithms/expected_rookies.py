@@ -41,6 +41,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 min_max_scaler = MinMaxScaler()
 data_minmax = min_max_scaler.fit_transform(X_train)
 
+f = open("../output/script1.txt", "w")
+f.write("Output of the script 1\n")
+
 regr = linear_model.LinearRegression()
 
 sample_weight = y_train.apply(lambda h: 3 if h < 90 else 2)
@@ -50,13 +53,14 @@ regr.fit(data_minmax, y_train, sample_weight=sample_weight)
 # Make predictions using the testing set
 y_pred = regr.predict(min_max_scaler.transform(X_test))
 
-print(min_max_scaler.scale_)
+f.write('\nscale ' + str(min_max_scaler.scale_))
 # The coefficients
-print('Coefficients: \n', regr.coef_)
+f.write('\nCoefficients: \n' + str(regr.coef_))
 # The mean squared error
-print('Mean squared error: %.2f'
+f.write('\nMean squared error: %.2f\n'
     % mean_squared_error(y_test, y_pred))
 # The coefficient of determination: 1 is perfect prediction
-print('Coefficient of determination: %.2f'
+f.write('\nCoefficient of determination: %.2f\n'
     % r2_score(y_test, y_pred))
 
+f.close()
