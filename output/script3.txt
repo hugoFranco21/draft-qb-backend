@@ -1,0 +1,4 @@
+Output of the script 3
+
+tree score: 0.7012987012987013
+random forest score 0.7922077922077922

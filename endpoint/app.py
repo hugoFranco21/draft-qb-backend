@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import request, jsonify
-from predictions import get_rookie_prediction, get_wins_prediction
+from predictions import get_rookie_prediction, get_wins_prediction, get_should_draft
 import json
 
 app = Flask(__name__)
@@ -27,6 +27,20 @@ def predict_wins():
         'success': False
     }
     if norm > 0:
+        output = {
+            'success': True,
+            'prediction': norm
+        }
+    return json.dumps(output)
+
+@app.route('/should-draft', methods=['POST'])
+def should_draft():
+    data = request.data
+    norm = get_should_draft(data)
+    output = {
+        'success': False
+    }
+    if not norm == None:
         output = {
             'success': True,
             'prediction': norm
