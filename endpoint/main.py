@@ -1,11 +1,14 @@
 from flask import Flask
+from flask_cors import CORS, cross_origin
 from flask import request, jsonify
 from predictions import get_rookie_prediction, get_wins_prediction, get_should_draft
 import json
 
 app = Flask(__name__)
+cors = CORS(app)
 
 @app.route('/rookie-production', methods=['POST'])
+@cross_origin()
 def predict_rookies():
     data = request.data
     norm = get_rookie_prediction(data)
@@ -20,6 +23,7 @@ def predict_rookies():
     return json.dumps(output)
 
 @app.route('/wins-expected', methods=['POST'])
+@cross_origin()
 def predict_wins():
     data = request.data
     norm = get_wins_prediction(data)
@@ -34,6 +38,7 @@ def predict_wins():
     return json.dumps(output)
 
 @app.route('/should-draft', methods=['POST'])
+@cross_origin()
 def should_draft():
     data = request.data
     norm = get_should_draft(data)
