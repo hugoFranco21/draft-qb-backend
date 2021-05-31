@@ -152,7 +152,7 @@ def get_should_draft(input):
     try:
         data = json.loads(input)
     except ValueError as err:
-        return -1
+        return None
     if not (validateJson(data, script_schema_3)):
         return None
     an_array = np.array(list(data.values()))
