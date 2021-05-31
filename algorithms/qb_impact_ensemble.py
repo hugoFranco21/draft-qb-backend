@@ -99,7 +99,7 @@ def main():
 	print(df_plot)
 	x_plot = df['QB Rating'].to_numpy()
 	y_plot = df['Wins'].to_numpy()
-	plt.plot(x_plot, y_plot)
+	plt.scatter(x_plot, y_plot)
 	plt.savefig('../assets/WinsVsRating.png')
 	min_max_scaler = MinMaxScaler()
 	data_minmax = min_max_scaler.fit_transform(X)
